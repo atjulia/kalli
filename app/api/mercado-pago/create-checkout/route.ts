@@ -33,7 +33,8 @@ export async function POST(req: NextRequest) {
         },
         ...(userEmail && { payer: { email: userEmail } }),
         metadata: {
-          testeId
+          testeId,
+          userEmail
         }
       }
     })
