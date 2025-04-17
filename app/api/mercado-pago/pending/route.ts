@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Payment, Preference } from "mercadopago";
+import { Payment } from "mercadopago";
 import mpClient from "@/app/lib/mercado-pago";
 
 export async function GET(req: NextRequest) {
