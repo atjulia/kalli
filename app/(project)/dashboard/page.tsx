@@ -10,7 +10,6 @@ import { Badge } from '@/app/components/ui/badge';
 
 export default async function Dashboard() {
 	const session = await auth();
-  console.log("session dashboard", session);
 	if (!session) {
 		redirect("/login");
 	}

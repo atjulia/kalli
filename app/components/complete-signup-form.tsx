@@ -1,67 +1,67 @@
-"use client"
+"use client";
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/app/components/ui/button';
 import { Input } from '@/app/components/ui/input';
 import { Label } from '@/app/components/ui/label';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/app/components/ui/select';
-import { useRouter } from 'next/navigation';
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '@/app/components/ui/select';
 import { CardContent, CardFooter } from './ui/card';
+import { WorkingHoursInput } from './working-hours-input';
+import { validateCNPJ } from '../lib/utils';
 
-export function CompleteSignupForm({ 
+export function CompleteSignupForm({
   initialData,
-  businessTypes,
-  userId
-}: { 
-  initialData: any,
-  businessTypes: string[],
-  userId?: string
+  businessTypes
+}: {
+  initialData: any;
+  businessTypes: string[];
 }) {
   const [formData, setFormData] = useState(initialData);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const router = useRouter();
 
-  // const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const { id, value } = e.target;
-  //   setFormData(prev => ({ ...prev, [id]: value }));
-  // };
-  
-  // const handleBusinessTypeChange = (value: string) => {
-  //   setFormData(prev => ({ ...prev, businessType: value }));
-  // };
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setFormData((prev: any) => ({ ...prev, [id]: value }));
+  };
 
-  // const handleTimezoneChange = (value: string) => {
-  //   setFormData(prev => ({ ...prev, timezone: value }));
-  // };
-
-  // const handleWorkingHoursChange = (e: React.ChangeEvent<HTMLInputElement>, day: string) => {
-  //   const { id, value } = e.target;
-  //   setFormData(prev => ({
-  //     ...prev,
-  //     workingHours: {
-  //       ...prev.workingHours,
-  //       [day]: {
-  //         ...prev.workingHours[day],
-  //         [id]: value,
-  //       }
-  //     }
-  //   }));
-  // };
+  const handleBusinessTypeChange = (value: string) => {
+    setFormData((prev: any) => ({ ...prev, businessType: value }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+    setErrors({});
+
+    const newErrors: { [key: string]: string } = {};
+
+    if (!formData.name) newErrors.name = 'Nome é obrigatório.';
+    if (!formData.phone) newErrors.phone = 'Telefone é obrigatório.';
+    if (!formData.businessType) newErrors.businessType = 'Tipo de negócio é obrigatório.';
+    if (!validateCNPJ(formData.cnpj)) {
+      newErrors.cnpj = 'CNPJ inválido.';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       const response = await fetch('/api/user/complete-signup', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...formData,
-          userId
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...formData }),
       });
 
       if (response.ok) {
@@ -81,94 +81,84 @@ export function CompleteSignupForm({
   return (
     <form onSubmit={handleSubmit}>
       <CardContent className="grid gap-4 mt-4">
-        <div className="grid gap-2">
-          <Label htmlFor="name">Nome Completo</Label>
-          <Input 
-            id="name" 
-            placeholder="Seu nome completo" 
-            value={formData.name}
-            // onChange={handleChange}
-            required
-          />
-        </div>
-        
-        <div className="grid gap-2">
-          <Label htmlFor="phone">Telefone</Label>
-          <Input 
-            id="phone" 
-            type="tel" 
-            placeholder="(00) 00000-0000" 
-            value={formData.phone}
-            // onChange={handleChange}
-            required
-          />
-        </div>
-        
-        <div className="grid gap-2">
-          <Label htmlFor="businessType">Tipo de Negócio</Label>
-          <Select 
-            // onValueChange={handleBusinessTypeChange} 
-            value={formData.businessType}
-            required
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Selecione seu ramo" />
-            </SelectTrigger>
-            <SelectContent>
-              {businessTypes.map(type => (
-                <SelectItem key={type} value={type}>{type}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <div className="flex gap-4">
+          <div className="w-1/2 grid gap-2">
+            <Label htmlFor="name">Nome Completo</Label>
+            <Input
+              id="name"
+              placeholder="Seu nome completo"
+              value={formData.name}
+              onChange={handleChange}
+              required
+            />
+            {errors.name && <span className="text-red-500 text-sm">{errors.name}</span>}
+          </div>
+
+          <div className="w-1/2 grid gap-2">
+            <Label htmlFor="phone">Telefone</Label>
+            <Input
+              id="phone"
+              type="tel"
+              placeholder="(00) 00000-0000"
+              value={formData.phone}
+              onChange={handleChange}
+              required
+            />
+            {errors.phone && <span className="text-red-500 text-sm">{errors.phone}</span>}
+          </div>
         </div>
 
-        <div className="grid gap-2">
-          <Label htmlFor="timezone">Fuso Horário</Label>
-          <Select
-            // onValueChange={handleTimezoneChange}
-            value={formData.timezone}
-            required
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Selecione seu fuso horário" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="America/Sao_Paulo">GMT-3 São Paulo</SelectItem>
-              <SelectItem value="America/New_York">GMT-4 Nova Iorque</SelectItem>
-              <SelectItem value="Europe/London">GMT London</SelectItem>
-            </SelectContent>
-          </Select>
+        <div className="flex gap-4">
+          <div className="w-1/2 grid gap-2">
+            <Label htmlFor="cnpj">CNPJ</Label>
+            <Input
+              id="cnpj"
+              placeholder="00.000.000/0000-00"
+              value={formData.cnpj || ''}
+              onChange={handleChange}
+              required
+            />
+            {errors.cnpj && <span className="text-red-500 text-sm">{errors.cnpj}</span>}
+          </div>
+
+          <div className="w-1/2 grid gap-2">
+            <Label htmlFor="businessType">Tipo de Negócio</Label>
+            <Select
+              onValueChange={handleBusinessTypeChange}
+              value={formData.businessType}
+              required
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione seu ramo" />
+              </SelectTrigger>
+              <SelectContent>
+                {businessTypes.map((type) => (
+                  <SelectItem key={type} value={type}>
+                    {type}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.businessType && (
+              <span className="text-red-500 text-sm">{errors.businessType}</span>
+            )}
+          </div>
         </div>
 
-        <div className="grid gap-2">
-          <Label htmlFor="workingHours.mondayStart">Segunda-feira - Horário de Início</Label>
-          <Input
-            id="mondayStart"
-            type="time"
-            value={formData.workingHours.monday.start}
-            // onChange={(e) => handleWorkingHoursChange(e, 'monday')}
+        <div className="grid gap-4">
+          <Label>Horários de Trabalho</Label>
+          <WorkingHoursInput
+            value={formData.workingHours}
+            onChange={(hours) =>
+              setFormData((prev: any) => ({ ...prev, workingHours: hours }))
+            }
           />
         </div>
-
-        <div className="grid gap-2">
-          <Label htmlFor="workingHours.mondayEnd">Segunda-feira - Horário de Término</Label>
-          <Input
-            id="mondayEnd"
-            type="time"
-            value={formData.workingHours.monday.end}
-            // onChange={(e) => handleWorkingHoursChange(e, 'monday')}
-          />
-        </div>
-
       </CardContent>
-      
+
       <CardFooter>
-        <Button 
-          type="submit" 
-          className="w-full mt-3" 
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? "Processando..." : "Completar Cadastro"}
+        <Button type="submit" className="w-full mt-3" disabled={isSubmitting}>
+          {isSubmitting ? 'Processando...' : 'Completar Cadastro'}
         </Button>
       </CardFooter>
     </form>

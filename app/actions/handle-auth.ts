@@ -9,7 +9,7 @@ export async function handleAuth() {
 		})
 	}
 
-	await signIn("google", {
-		redirectTo: "/dashboard"
-	})
+	await signIn("google", ({
+		redirectTo: "/signup/complete"
+	}))
 }
