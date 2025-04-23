@@ -7,6 +7,17 @@ import { Button } from '@/app/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/app/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/app/components/ui/tabs';
 import { Badge } from '@/app/components/ui/badge';
+import { createUserService, getUser } from "@/app/actions/handle-user";
+import { AvailabilitySchedule } from "@/app/components/available-appointments";
+import { ServiceModal } from "@/app/components/service-modal";
+
+interface Service {
+  serviceId: string;
+  name: string;
+  description: string;
+  duration: string;
+  price: string;
+}
 
 export default async function Dashboard() {
 	const session = await auth();
@@ -14,31 +25,26 @@ export default async function Dashboard() {
 		redirect("/login");
 	}
 
+  const user = await getUser(session.user.id!);
+  console.log("User:", user)
+
   const upcomingAppointments = [
     { id: 1, client: 'Ana Silva', service: 'Corte de Cabelo', date: '2023-11-15', time: '14:00', status: 'confirmado' },
     { id: 2, client: 'Carlos Oliveira', service: 'Manicure', date: '2023-11-16', time: '10:30', status: 'confirmado' },
     { id: 3, client: 'Mariana Costa', service: 'Massagem', date: '2023-11-17', time: '16:00', status: 'pendente' }
   ];
 
-  const availableSlots = [
-    { id: 1, date: '2023-11-15', time: '09:00' },
-    { id: 2, date: '2023-11-15', time: '11:00' },
-    { id: 3, date: '2023-11-16', time: '13:30' },
-    { id: 4, date: '2023-11-17', time: '15:00' }
-  ];
-
-  const services = [
-    { id: 1, name: 'Corte de Cabelo', duration: '60 min', price: 'R$ 60,00' },
-    { id: 2, name: 'Manicure', duration: '45 min', price: 'R$ 35,00' },
-    { id: 3, name: 'Massagem', duration: '90 min', price: 'R$ 120,00' }
-  ];
+  const handleSaveService = async (service: any) => {
+    "use server"
+    createUserService(service, user.userId);
+    redirect("/dashboard");
+  };
 
 	 return (
     <div className="min-h-screen bg-gray-50">
 
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col md:flex-row gap-8">
-          {/* Sidebar */}
           <aside className="w-full md:w-64 space-y-6">
             <Card>
               <CardHeader>
@@ -61,21 +67,28 @@ export default async function Dashboard() {
                 <CardTitle className="text-lg">Meus Serviços</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {services.map(service => (
-                  <div key={service.id} className="flex justify-between items-center">
+                { user.services.map((service: Service) => (
+                  <div key={service.serviceId} className="flex justify-between items-center">
                     <div>
                       <p className="font-medium">{service.name}</p>
                       <p className="text-sm text-gray-500">{service.duration} • {service.price}</p>
                     </div>
-                    <Button variant="ghost" size="sm">
-                      <Edit className="w-4 h-4" />
-                    </Button>
+                    <ServiceModal 
+                      service={service} 
+                      onSave={handleSaveService}
+                    >
+                      <Button variant="ghost" size="sm">
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                    </ServiceModal>
                   </div>
                 ))}
-                <Button variant="outline" className="w-full mt-4">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Adicionar serviço
-                </Button>
+                <ServiceModal onSave={handleSaveService}>
+                  <Button variant="outline" className="w-full mt-4">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Adicionar serviço
+                  </Button>
+                </ServiceModal>
               </CardContent>
             </Card>
           </aside>
@@ -84,10 +97,6 @@ export default async function Dashboard() {
           <main className="flex-1">
             <div className="flex justify-between items-center mb-6">
               <h1 className="text-2xl font-bold">Meus Agendamentos</h1>
-              <Button>
-                <Plus className="w-4 h-4 mr-2" />
-                Novo agendamento
-              </Button>
             </div>
 
             <Tabs defaultValue="agendados">
@@ -159,18 +168,10 @@ export default async function Dashboard() {
                     <CardDescription>Configure seus horários de atendimento</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                      {availableSlots.map(slot => (
-                        <div key={slot.id} className="border rounded-lg p-4 text-center hover:bg-gray-50 cursor-pointer">
-                          <p className="font-medium">{slot.date}</p>
-                          <p className="text-indigo-600">{slot.time}</p>
-                        </div>
-                      ))}
-                    </div>
-                    <Button variant="outline" className="mt-4">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Adicionar horário
-                    </Button>
+                  <AvailabilitySchedule 
+                    workingHours={user.workingHours} 
+                    services={user.services}
+                  />
                   </CardContent>
                 </Card>
               </TabsContent>
