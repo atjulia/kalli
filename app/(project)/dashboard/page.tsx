@@ -36,7 +36,7 @@ export default async function Dashboard() {
 
   const handleSaveService = async (service: any, isEdit: boolean) => {
     "use server"
-    
+
     await createUpdateUserService(service, user.userId, isEdit);
     redirect("/dashboard");
   };
@@ -172,6 +172,7 @@ export default async function Dashboard() {
                   <AvailabilitySchedule 
                     workingHours={user.workingHours} 
                     services={user.services}
+                    userId={user.userId}
                   />
                   </CardContent>
                 </Card>
