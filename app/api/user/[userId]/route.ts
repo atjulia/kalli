@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/app/lib/firebase';
 
 export async function GET(request: NextRequest, { params }: { params: { userId: string } }) {
-  const userId = await params.userId;
+  const userId = await params?.userId;
 
   if (!userId) {
     return NextResponse.json({ message: 'Não autorizado' }, { status: 401 });

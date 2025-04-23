@@ -23,7 +23,7 @@ interface Service {
 
 interface ServiceModalProps {
   service?: Service | null
-  onSave: (service: Service) => void
+  onSave: (service: Service, isEditing: boolean) => void
   children: React.ReactNode
 }
 
@@ -46,7 +46,7 @@ export function ServiceModal({ service, onSave, children }: ServiceModalProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    onSave(formData)
+    onSave(formData, !!service)
     setOpen(false)
   }
 

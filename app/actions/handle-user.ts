@@ -23,16 +23,16 @@ export async function getUser(userId: string) {
   }
 }
 
-export async function createUserService(serviceData: string, userId: string) {
+export async function createUpdateUserService(serviceData: string, userId: string, isEdit: boolean) {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL;
-    const response = await fetch(`${baseUrl}/api/user/create-service`, {
+    const response = await fetch(`${baseUrl}/api/user/service`, {
       method: 'POST',
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ serviceData, userId: userId })
+      body: JSON.stringify({ serviceData, userId: userId, isEdit: isEdit }),
     });
 
     if (response.ok) {

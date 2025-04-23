@@ -7,7 +7,7 @@ import { Button } from '@/app/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/app/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/app/components/ui/tabs';
 import { Badge } from '@/app/components/ui/badge';
-import { createUserService, getUser } from "@/app/actions/handle-user";
+import { createUpdateUserService, getUser } from "@/app/actions/handle-user";
 import { AvailabilitySchedule } from "@/app/components/available-appointments";
 import { ServiceModal } from "@/app/components/service-modal";
 
@@ -34,9 +34,10 @@ export default async function Dashboard() {
     { id: 3, client: 'Mariana Costa', service: 'Massagem', date: '2023-11-17', time: '16:00', status: 'pendente' }
   ];
 
-  const handleSaveService = async (service: any) => {
+  const handleSaveService = async (service: any, isEdit: boolean) => {
     "use server"
-    createUserService(service, user.userId);
+    
+    await createUpdateUserService(service, user.userId, isEdit);
     redirect("/dashboard");
   };
 
