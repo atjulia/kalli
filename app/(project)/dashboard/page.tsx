@@ -2,7 +2,7 @@ import { auth } from "@/app/lib/auth";
 import { redirect } from "next/navigation";
 import { handleAuth } from "@/app/actions/handle-auth"
 import Link from "next/link";
-import { Calendar, Clock, User, Settings, Plus, Edit, Trash, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar, Clock, User, Phone, Settings, FileText, Plus, Edit, Trash, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/app/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/app/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/app/components/ui/tabs';
@@ -11,6 +11,7 @@ import { createUpdateUserService, getUser } from "@/app/actions/handle-user";
 import { AvailabilitySchedule } from "@/app/components/available-appointments";
 import { ServiceModal } from "@/app/components/service-modal";
 import { Service } from "@/app/types/service";
+import { getUserAppointments } from "@/app/actions/handle-appointments";
 
 export default async function Dashboard() {
 	const session = await auth();
@@ -19,13 +20,8 @@ export default async function Dashboard() {
 	}
 
   const user = await getUser(session.user?.id!);
+  const upcomingAppointments = await getUserAppointments(session.user?.id!);
   console.log("User:", user)
-
-  const upcomingAppointments = [
-    { id: 1, client: 'Ana Silva', service: 'Corte de Cabelo', date: '2023-11-15', time: '14:00', status: 'confirmado' },
-    { id: 2, client: 'Carlos Oliveira', service: 'Manicure', date: '2023-11-16', time: '10:30', status: 'confirmado' },
-    { id: 3, client: 'Mariana Costa', service: 'Massagem', date: '2023-11-17', time: '16:00', status: 'pendente' }
-  ];
 
   const handleSaveService = async (service: any, isEdit: boolean) => {
     "use server"
@@ -121,35 +117,74 @@ export default async function Dashboard() {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-4">
-                      {upcomingAppointments.map(appointment => (
-                        <div key={appointment.id} className="flex items-start p-4 border rounded-lg hover:bg-gray-50">
-                          <div className="flex-1">
-                            <div className="flex items-center space-x-2">
-                              <p className="font-medium">{appointment.service}</p>
-                              <Badge variant={appointment.status === 'confirmado' ? 'default' : 'secondary'}>
-                                {appointment.status}
-                              </Badge>
+                    <div className="space-y-3">
+                      {upcomingAppointments.map((appointment: any) => {
+                        const formattedDate = new Date(appointment.date).toLocaleDateString('pt-BR', {
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric'
+                        });
+                        
+                        const serviceNames = appointment.services.map((serviceId: string) => 
+                          user.services.find((s: any) => s.id === serviceId)?.name || 'Serviço'
+                        ).join(' + ');
+
+                        return (
+                          <div key={appointment.id} className="p-4 border rounded-lg hover:bg-gray-50/50 transition-colors">
+                            <div className="flex justify-between items-start">
+                              <div className="space-y-2">
+                                <div className="flex items-center gap-3">
+                                  <h4 className="font-medium text-base">{serviceNames}</h4>
+                                  <Badge 
+                                    variant={appointment.status === 'confirmed' ? 'default' : 'outline'}
+                                    className="rounded-full px-2.5 py-0.5 text-xs"
+                                  >
+                                    {appointment.status === 'confirmed' ? 'Confirmado' : 'Pendente'}
+                                  </Badge>
+                                </div>
+                                
+                                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                                  <div className="flex items-center text-gray-600">
+                                    <User className="w-4 h-4 mr-2 opacity-70" />
+                                    <span>{appointment.client.name}</span>
+                                  </div>
+                                  
+                                  <div className="flex items-center text-gray-600">
+                                    <Phone className="w-4 h-4 mr-2 opacity-70" />
+                                    <span>{appointment.client.phone}</span>
+                                  </div>
+                                  
+                                  <div className="flex items-center text-gray-600">
+                                    <Calendar className="w-4 h-4 mr-2 opacity-70" />
+                                    <span>{formattedDate}</span>
+                                  </div>
+                                  
+                                  <div className="flex items-center text-gray-600">
+                                    <Clock className="w-4 h-4 mr-2 opacity-70" />
+                                    <span>{appointment.time}</span>
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              <div className="flex gap-1">
+                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                  <Edit className="w-4 h-4" />
+                                </Button>
+                                <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-600">
+                                  <Trash className="w-4 h-4" />
+                                </Button>
+                              </div>
                             </div>
-                            <p className="text-sm text-gray-600 mt-1">
-                              <User className="inline w-4 h-4 mr-1" />
-                              {appointment.client}
-                            </p>
-                            <p className="text-sm text-gray-600 mt-1">
-                              <Clock className="inline w-4 h-4 mr-1" />
-                              {appointment.date} • {appointment.time}
-                            </p>
+                            
+                            {appointment.notes && (
+                              <div className="mt-3 pt-3 border-t text-sm text-gray-600 flex">
+                                <FileText className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0 opacity-70" />
+                                <span className="italic">{appointment.notes}</span>
+                              </div>
+                            )}
                           </div>
-                          <div className="flex space-x-2">
-                            <Button variant="ghost" size="sm">
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                            <Button variant="ghost" size="sm">
-                              <Trash className="w-4 h-4 text-red-500" />
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </CardContent>
                 </Card>
@@ -166,6 +201,7 @@ export default async function Dashboard() {
                     workingHours={user.workingHours} 
                     services={user.services}
                     userId={user.userId}
+                    appointments={upcomingAppointments}
                   />
                   </CardContent>
                 </Card>

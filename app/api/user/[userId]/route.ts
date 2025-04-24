@@ -2,21 +2,23 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/app/lib/firebase';
 
 export async function GET(request: NextRequest, { params }: { params: { userId: string } }) {
-  const userId = await params?.userId;
+  const userId = params?.userId;
 
   if (!userId) {
     return NextResponse.json({ message: 'Não autorizado' }, { status: 401 });
   }
 
   try {
-    const docRef = db.collection('users').doc(userId);
-    const docSnap = await docRef.get();
+    const userDocRef = db.collection('users').doc(userId);
+    const userDocSnap = await userDocRef.get();
 
-    if (!docSnap.exists) {
+    if (!userDocSnap.exists) {
       return NextResponse.json({ message: 'Usuário não encontrado' }, { status: 404 });
     }
 
-    return NextResponse.json({ user: docSnap.data() }, { status: 200 });
+    return NextResponse.json({
+      user: userDocSnap.data()
+    }, { status: 200 });
   } catch (error) {
     console.error(error);
     return NextResponse.json(

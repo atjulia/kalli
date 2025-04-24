@@ -10,19 +10,21 @@ import { createAppointment } from '../actions/handle-appointments';
 import { ScheduleModal } from './schedule-appointment-modal';
 import { redirect } from "next/navigation";
 import { Service } from '../types/service';
-import { AppointmentData } from '../types/appointments';
+import { AppointmentData, UserAppointments } from '../types/appointments';
 import { WorkingHours } from '../types/user';
 
 interface AvailabilityScheduleProps {
   workingHours: WorkingHours;
   services: Service[];
   userId: string;
+  appointments?: UserAppointments[];
 }
 
 export function AvailabilitySchedule({
   workingHours,
   services,
   userId,
+  appointments
 }: AvailabilityScheduleProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [days, setDays] = useState<Date[]>([]);
@@ -62,8 +64,33 @@ export function AvailabilitySchedule({
       slots.push(timeString);
       startTime.setMinutes(startTime.getMinutes() + 30);
     }
-    
     return slots;
+  };
+
+  const isTimeBooked = (date: Date, time: string) => {
+    const targetDate = format(date, 'yyyy-MM-dd');
+    return appointments?.some(appointment => {
+      const appointmentDate = appointment.date.split('T')[0];
+      
+      return (
+        appointmentDate === targetDate &&
+        appointment.time === time
+      );
+    });
+  };
+
+  const isTimeInPast = (date: Date, time: string) => {
+    const now = new Date();
+    
+    if (!isSameDay(date, now)) {
+      return false;
+    }
+  
+    const [hours, minutes] = time.split(':').map(Number);
+    const slotTime = new Date();
+    slotTime.setHours(hours, minutes, 0, 0);
+  
+    return slotTime < now;
   };
 
   const nextDay = () => {
@@ -124,15 +151,29 @@ export function AvailabilitySchedule({
         {getDayAvailability(currentDate).available ? (
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
             {getDayAvailability(currentDate).slots.flatMap(slot => 
-              generateTimeSlots(slot.start, slot.end).map(time => (
-                <button
-                  key={`${currentDate}-${time}`}
-                  onClick={() => setSelectedTime(time)}
-                  className="bg-gray-100 hover:bg-gray-200 rounded-md p-2 text-center text-sm transition-colors"
-                >
-                  {time}
-                </button>
-              ))
+              generateTimeSlots(slot.start, slot.end).map(time => {
+                const isBooked = isTimeBooked(currentDate, time);
+                const isPastTime = isTimeInPast(currentDate, time);
+                const isDisabled = isBooked || isPastTime;
+
+                return (
+                  <button
+                    key={`${currentDate}-${time}`}
+                    className={`rounded-md p-2 text-center text-sm transition-colors ${
+                      isBooked
+                        ? 'bg-red-50 text-red-400 cursor-not-allowed'
+                        : isPastTime
+                          ? 'bg-gray-50 text-gray-400 cursor-not-allowed'
+                          : 'bg-gray-100 hover:bg-gray-200'
+                    }`}
+                    disabled={isDisabled}
+                  >
+                    {time}
+                    {isBooked && <span className="block text-xs text-red-400">Reservado</span>}
+                    {isPastTime && !isBooked && <span className="block text-xs text-gray-400">Indisponível</span>}
+                  </button>
+                );
+              })
             )}
           </div>
         ) : (

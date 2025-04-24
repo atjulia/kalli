@@ -8,3 +8,14 @@ export interface AppointmentData {
   client: ClientData;
   notes: string;
 }
+
+export interface UserAppointments {
+  id: string;
+  appointmentId: string;
+  client: ClientData;
+  date: string;
+  time: string;
+  services: string[];
+  notes: string;
+  status: string;
+}
