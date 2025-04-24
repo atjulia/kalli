@@ -29,7 +29,22 @@ import {
 } from "@/app/components/ui/popover";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/app/lib/utils";
-import { ClientData, ScheduleModalProps } from './available-appointments';
+import { ClientData } from '../types/client';
+import { Service } from '../types/service';
+
+interface ScheduleModalProps {
+  selectedTime: string;
+  selectedDate: Date;
+  onClose: () => void;
+  services: Service[];
+  onSubmit: (data: {
+    date: Date;
+    time: string;
+    services: string[];
+    client: ClientData;
+    notes: string;
+  }) => void;
+}
 
 export function ScheduleModal({
   selectedTime,
@@ -67,7 +82,6 @@ export function ScheduleModal({
       });
     }
   };
-
   return (
     <Dialog open={!!selectedTime} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[600px]">
@@ -102,20 +116,20 @@ export function ScheduleModal({
                   <CommandGroup className="max-h-[300px] overflow-y-auto">
                     {services.map((service) => (
                       <CommandItem
-                        key={service.serviceId}
-                        onSelect={() => handleServiceSelect(service.serviceId)}
+                        key={service.id}
+                        onSelect={() => handleServiceSelect(service.id)}
                       >
                         <Check
                           className={cn(
                             "mr-2 h-4 w-4",
-                            selectedServices.includes(service.serviceId) ? "opacity-100" : "opacity-0"
+                            selectedServices.includes(service.id) ? "opacity-100" : "opacity-0"
                           )}
                         />
                         <div className="flex-1">
                           <p>{service.name}</p>
-                          {/* <p className="text-xs text-gray-500">
+                          <p className="text-xs text-gray-500">
                             {service.duration} • {service.price}
-                          </p> */}
+                          </p>
                         </div>
                       </CommandItem>
                     ))}
@@ -126,7 +140,7 @@ export function ScheduleModal({
             {selectedServices.length > 0 && (
               <div className="mt-2 flex flex-wrap gap-2">
                 {selectedServices.map(serviceId => {
-                  const service = services.find(s => s.serviceId === serviceId);
+                  const service = services.find((s: { id: string; }) => s.id === serviceId);
                   return (
                     <div key={serviceId} className="flex justify-between text-sm">
                       <Badge variant="secondary">{service?.name}</Badge>

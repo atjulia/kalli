@@ -6,16 +6,7 @@ import { Label } from '@/app/components/ui/label'
 import { Switch } from '@/app/components/ui/switch'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import { cn } from '@/app/lib/utils'
-
-interface TimeSlot {
-  start: string
-  end: string
-}
-
-interface DaySchedule {
-  available: boolean
-  slots: TimeSlot[]
-}
+import { DaySchedule } from '../types/user'
 
 interface WorkingHoursInputProps {
   value: Record<string, DaySchedule>

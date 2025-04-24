@@ -16,7 +16,7 @@ export async function POST(request: Request) {
 
     if (!data.isEdit) {
       const newService = {
-        serviceId: crypto.randomUUID(),
+        id: crypto.randomUUID(),
         name: data.serviceData.name,
         description: data.serviceData.description,
         duration: data.serviceData.duration,
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
       });
     } else {
       const updatedService = {
-        serviceId: data.serviceData.serviceId,
+        id: data.serviceData.id,
         name: data.serviceData.name,
         description: data.serviceData.description,
         duration: data.serviceData.duration,
@@ -37,7 +37,7 @@ export async function POST(request: Request) {
       };
 
       const updatedServices = currentServices.map((s: any) =>
-        s.serviceId === updatedService.serviceId ? updatedService : s
+        s.id === updatedService.id ? updatedService : s
       );
 
       await userRef.update({

@@ -1,8 +1,7 @@
-import { AppointmentData } from "../components/available-appointments";
+import { AppointmentData } from "../types/appointments";
 
 export async function createAppointment(appointmentData: AppointmentData, userId: string) {
   try {
-    console.log(userId)
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL;
     const response = await fetch(`${baseUrl}/api/appointments/create-appointment`, {
       method: 'POST',

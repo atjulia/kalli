@@ -12,16 +12,9 @@ import {
 import { Input } from '@/app/components/ui/input'
 import { Label } from '@/app/components/ui/label'
 import { Textarea } from '@/app/components/ui/textarea'
+import { Service } from '../types/service'
 
-interface Service {
-  id?: number
-  name: string
-  description?: string
-  duration: string
-  price: string
-}
-
-interface ServiceModalProps {
+export interface ServiceModalProps {
   service?: Service | null
   onSave: (service: Service, isEditing: boolean) => void
   children: React.ReactNode
@@ -30,6 +23,7 @@ interface ServiceModalProps {
 export function ServiceModal({ service, onSave, children }: ServiceModalProps) {
   const [open, setOpen] = useState(false)
   const [formData, setFormData] = useState<Service>(service || {
+    id: crypto.randomUUID(),
     name: '',
     description: '',
     duration: '',

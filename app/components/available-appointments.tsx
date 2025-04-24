@@ -9,57 +9,14 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { createAppointment } from '../actions/handle-appointments';
 import { ScheduleModal } from './schedule-appointment-modal';
 import { redirect } from "next/navigation";
-
-interface WorkingHours {
-  [key: string]: {
-    slots: {
-      start: string;
-      end: string;
-    }[];
-    available: boolean;
-  };
-}
-
-interface Service {
-  serviceId: string;
-  name: string;
-  description: string;
-  duration: string;
-  price: string;
-}
+import { Service } from '../types/service';
+import { AppointmentData } from '../types/appointments';
+import { WorkingHours } from '../types/user';
 
 interface AvailabilityScheduleProps {
   workingHours: WorkingHours;
   services: Service[];
   userId: string;
-}
-
-export interface ClientData {
-  name: string;
-  phone: string;
-  email: string;
-}
-
-export interface AppointmentData {
-  date: Date;
-  time: string;
-  services: string[];
-  client: ClientData;
-  notes: string;
-}
-
-export interface ScheduleModalProps {
-  selectedTime: string | null;
-  selectedDate: Date;
-  onClose: () => void;
-  services: Service[];
-  onSubmit: (data: {
-    date: Date;
-    time: string;
-    services: string[];
-    client: ClientData;
-    notes: string;
-  }) => void;
 }
 
 export function AvailabilitySchedule({
@@ -203,7 +160,7 @@ export function AvailabilitySchedule({
       </div>
 
       <ScheduleModal
-        selectedTime={selectedTime}
+        selectedTime={selectedTime || ''}
         selectedDate={currentDate}
         onClose={() => setSelectedTime(null)}
         services={services}

@@ -10,14 +10,7 @@ import { Badge } from '@/app/components/ui/badge';
 import { createUpdateUserService, getUser } from "@/app/actions/handle-user";
 import { AvailabilitySchedule } from "@/app/components/available-appointments";
 import { ServiceModal } from "@/app/components/service-modal";
-
-interface Service {
-  serviceId: string;
-  name: string;
-  description: string;
-  duration: string;
-  price: string;
-}
+import { Service } from "@/app/types/service";
 
 export default async function Dashboard() {
 	const session = await auth();
@@ -25,7 +18,7 @@ export default async function Dashboard() {
 		redirect("/login");
 	}
 
-  const user = await getUser(session.user.id!);
+  const user = await getUser(session.user?.id!);
   console.log("User:", user)
 
   const upcomingAppointments = [
@@ -69,7 +62,7 @@ export default async function Dashboard() {
               </CardHeader>
               <CardContent className="space-y-4">
                 { user.services.map((service: Service) => (
-                  <div key={service.serviceId} className="flex justify-between items-center">
+                  <div key={service.id} className="flex justify-between items-center">
                     <div>
                       <p className="font-medium">{service.name}</p>
                       <p className="text-sm text-gray-500">{service.duration} • {service.price}</p>
