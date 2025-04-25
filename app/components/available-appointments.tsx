@@ -166,6 +166,7 @@ export function AvailabilitySchedule({
                           ? 'bg-gray-50 text-gray-400 cursor-not-allowed'
                           : 'bg-gray-100 hover:bg-gray-200'
                     }`}
+                    onClick={() => setSelectedTime(time)}
                     disabled={isDisabled}
                   >
                     {time}
