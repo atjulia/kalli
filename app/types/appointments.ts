@@ -1,5 +1,6 @@
 
 import { ClientData } from "./client";
+import { Service } from "./service";
 
 export interface AppointmentData {
   date: Date;
@@ -15,7 +16,7 @@ export interface UserAppointments {
   client: ClientData;
   date: string;
   time: string;
-  services: string[];
+  services: Service[];
   notes: string;
   status: string;
 }

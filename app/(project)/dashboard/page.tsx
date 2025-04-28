@@ -20,7 +20,7 @@ export default async function Dashboard() {
 	}
 
   const user = await getUser(session.user?.id!);
-  const upcomingAppointments = await getUserAppointments(session.user?.id!);
+  const upcomingAppointments = await getUserAppointments(session.user?.id!, user.services);
   console.log("User:", user)
 
   const handleSaveService = async (service: any, isEdit: boolean) => {
@@ -125,8 +125,8 @@ export default async function Dashboard() {
                           year: 'numeric'
                         });
                         
-                        const serviceNames = appointment.services.map((serviceId: string) => 
-                          user.services.find((s: any) => s.id === serviceId)?.name || 'Serviço'
+                        const serviceNames = appointment.services.map((service: any) => 
+                          user.services.find((s: any) => s.id === service.id)?.name || 'Serviço'
                         ).join(' + ');
 
                         return (

@@ -67,15 +67,37 @@ export function AvailabilitySchedule({
     return slots;
   };
 
+  const calculateSlotsForService = (duration: number) => {
+    return Math.ceil(duration / 30);
+  };
+  
   const isTimeBooked = (date: Date, time: string) => {
     const targetDate = format(date, 'yyyy-MM-dd');
+    const timeSlot = new Date(`1970-01-01T${time}:00`);
+    
     return appointments?.some(appointment => {
       const appointmentDate = appointment.date.split('T')[0];
       
-      return (
-        appointmentDate === targetDate &&
-        appointment.time === time
-      );
+      if (appointmentDate !== targetDate) return false;
+      
+      const appointmentTime = new Date(`1970-01-01T${appointment.time}:00`);
+      const totalDurationInMinutes = appointment.services.reduce((total, service) => {
+        console.log(service)
+        const durationInMinutes = parseInt(service.duration.match(/\d+/)?.[0] || '0');
+        return total + durationInMinutes;
+      }, 0);
+      const appointmentSlots = calculateSlotsForService(totalDurationInMinutes);
+      
+      for (let i = 0; i < appointmentSlots; i++) {
+        const appointmentSlotTime = new Date(appointmentTime.getTime());
+        appointmentSlotTime.setMinutes(appointmentSlotTime.getMinutes() + (i * 30));
+        
+        if (appointmentSlotTime.getTime() === timeSlot.getTime()) {
+          return true;
+        }
+      }
+      
+      return false;
     });
   };
 

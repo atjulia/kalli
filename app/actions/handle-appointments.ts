@@ -1,4 +1,5 @@
 import { AppointmentData } from "../types/appointments";
+import { Service } from "../types/service";
 
 export async function createAppointment(appointmentData: AppointmentData, userId: string) {
   try {
@@ -25,7 +26,7 @@ export async function createAppointment(appointmentData: AppointmentData, userId
   }
 }
 
-export async function getUserAppointments(userId: string) {
+export async function getUserAppointments(userId: string, services: Service[]) {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL;
     const response = await fetch(`${baseUrl}/api/appointments/${userId}`, {
@@ -37,7 +38,21 @@ export async function getUserAppointments(userId: string) {
     
     if (response.ok) {
       const data = await response.json();
-      return data.appointments;
+      const appointments = data.appointments.map((appointment: any) => {
+        const appointmentServices = appointment.services.map((service: any) => {
+          const serviceDetails = services.find((s: any) => s.id === service);
+          return {
+            id: service,
+            duration: serviceDetails ? serviceDetails.duration : 30,
+          };
+        });
+
+        return {
+          ...appointment,
+          services: appointmentServices,
+        };
+      });
+      return appointments;
     } else {
       const errorData = await response.json();
       console.error(errorData);
