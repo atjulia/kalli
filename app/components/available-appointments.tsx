@@ -82,7 +82,6 @@ export function AvailabilitySchedule({
       
       const appointmentTime = new Date(`1970-01-01T${appointment.time}:00`);
       const totalDurationInMinutes = appointment.services.reduce((total, service) => {
-        console.log(service)
         const durationInMinutes = parseInt(service.duration.match(/\d+/)?.[0] || '0');
         return total + durationInMinutes;
       }, 0);

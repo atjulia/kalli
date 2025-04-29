@@ -12,7 +12,12 @@ export async function GET(
   }
 
   try {
-    const appointmentsRef = db.collection('users').doc(userId).collection('appointments');
+    const appointmentsRef = db
+      .collection('users')
+      .doc(userId)
+      .collection('appointments')
+      .orderBy('date', 'desc');
+    
     const snapshot = await appointmentsRef.get();
 
     const appointments = snapshot.docs.map(doc => ({
