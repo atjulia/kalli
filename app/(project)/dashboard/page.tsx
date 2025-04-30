@@ -22,7 +22,6 @@ export default async function Dashboard() {
 
   const user = await getUser(session.user?.id!);
   const upcomingAppointments = await getUserAppointments(session.user?.id!, user.services);
-  console.log("User:", user)
 
   const handleSaveService = async (service: any, isEdit: boolean) => {
     "use server"
