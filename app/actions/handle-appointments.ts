@@ -12,7 +12,7 @@ export async function createAppointment(appointmentData: AppointmentData, userId
       },
       body: JSON.stringify({ appointmentData, userId: userId }),
     });
-
+    
     if (response.ok) {
       const data = await response.json();
       return data.user;
@@ -44,6 +44,7 @@ export async function getUserAppointments(userId: string, services: Service[]) {
           return {
             id: service,
             duration: serviceDetails ? serviceDetails.duration : 30,
+            price: serviceDetails?.price
           };
         });
 

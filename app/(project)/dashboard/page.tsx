@@ -22,6 +22,26 @@ export default async function Dashboard() {
 
   const user = await getUser(session.user?.id!);
   const upcomingAppointments = await getUserAppointments(session.user?.id!, user.services);
+  const appointmentTodayLength = await upcomingAppointments.filter((p: { date: Date; }) => p.date === new Date).length
+  
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
+
+  const totalFaturamento = upcomingAppointments
+    .filter((app: { date: string | number | Date; }) => {
+      const date = new Date(app.date);
+      return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
+    })
+    .flatMap((app: { services: any; }) => app.services)
+    .reduce((sum: number, service: { price: string; }) => {
+      const number = parseFloat(service.price.replace("R$ ", "").replace(".", "").replace(",", "."));
+      return sum + number;
+    }, 0);
+  const formattedTotal = totalFaturamento.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL'
+  });
 
   const handleSaveService = async (service: any, isEdit: boolean) => {
     "use server"
@@ -43,11 +63,11 @@ export default async function Dashboard() {
               <CardContent className="space-y-4">
                 <div>
                   <p className="text-sm text-gray-500">Agendamentos hoje</p>
-                  <p className="text-2xl font-bold">3</p>
+                  <p className="text-2xl font-bold">{appointmentTodayLength}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Faturamento mensal</p>
-                  <p className="text-2xl font-bold">R$ 2.450,00</p>
+                  <p className="text-2xl font-bold">{formattedTotal}</p>
                 </div>
               </CardContent>
             </Card>
